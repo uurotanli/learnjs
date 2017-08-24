@@ -1,7 +1,7 @@
 'use strict'
 
 var learnjs = {
-    poolId: 'us-east-1:3401b3b7-ebc1-4e4a-bcae-345645b56b9d'
+    poolId: 'us-east-1:61c0011c-fcd0-4c18-a459-bad95850e948'
 };
 
 learnjs.problems = [
@@ -12,6 +12,10 @@ learnjs.problems = [
     {
         description: "Simple Math",
         code: "function problem(){ return 42 === 6 * __;}"
+    },
+    {   
+        description: "Adding Test 1",
+        code: "function problem(){ return 'hoge' == '__';}"
     }
 ];
 
@@ -22,17 +26,18 @@ learnjs.problemView = function(data){
     var view = learnjs.template("problem-view");
     var problemData = learnjs.problems[problemNumber-1];
     var resultFlash = view.find('.result');
+    var answer = view.find('.answer');    
 
     function checkAnswer(){
-        var answer = view.find('.answer').val();
-        var test = problemData.code.replace('__', answer) + '; problem();';
+        var test = problemData.code.replace('__', answer.val()) + '; problem();';
         return eval(test);
     }
 
     function checkAnswerClick(){
-        if (checkAnswer()) {
-            var correctFlash = learnjs.buildCorrectFlash(problemNumber);
-            learnjs.flashElement(resultFlash, correctFlash);
+        if (checkAnswer()) {           
+            var flashContent = learnjs.buildCorrectFlash(problemNumber);
+            learnjs.flashElement(resultFlash, flashContent);
+            learnjs.saveAnswer(problemNumber, answer.val());            
         } else {
             learnjs.flashElement(resultFlash, 'Incorrect!');
         }
@@ -42,6 +47,12 @@ learnjs.problemView = function(data){
     view.find('.check-btn').click(checkAnswerClick);
     view.find('.title').text('Problem #' + problemNumber);
     learnjs.applyObject(problemData, view);
+
+    learnjs.fetchAnswer(problemNumber).then(function(data){
+        if(data.Item){
+            answer.val(data.Item.answer);            
+        }
+    });
 
     if (problemNumber < learnjs.problems.length){
         var buttonItem = learnjs.template('skip-btn');
@@ -116,8 +127,6 @@ learnjs.triggerEvent = function(name, args){
 }
 
 function googleSignIn(googleUser){
-    // console.log('グーグルサインインよんだ')
-
     var id_token = googleUser.getAuthResponse().id_token;
     AWS.config.update({
         region: 'us-east-1',
@@ -171,4 +180,59 @@ learnjs.addProfileLink = function(profile){
     var link = learnjs.template('profile-link');
     link.find('a').text(profile.email);
     $('.signin-bar').prepend(link);
+}
+
+learnjs.sendDbRequest = function(req, retry){
+    var promise = new $.Deferred();
+    req.on('error', function(error){
+        if (error.code == "CredentialsError"){
+            learnjs.identity.then(function(identity){
+                return identity.refresh().then(function(){
+                    return retry();
+                }, function(){
+                    promise.reject(resp);
+                });
+            });
+        }else{
+            promise.reject(error);
+        }
+    });
+    req.on('success', function(resp){
+        promise.resolve(resp.data);
+    });
+    req.send();
+    return promise;
+}
+
+learnjs.saveAnswer = function(problemId, answer){
+    return learnjs.identity.then(function(identity){
+        var db = new AWS.DynamoDB.DocumentClient();
+        var item = {
+            TableName:  'learnjs',
+            Item:{
+                userId: identity.id,
+                problemId: problemId,
+                answer: answer
+            }
+        };
+        return learnjs.sendDbRequest(db.put(item), function(){
+            return learnjs.saveAnswer(problemId, answer);
+        });
+    });
+}
+
+learnjs.fetchAnswer = function(problemId){
+    return learnjs.identity.then(function(identity){
+        var db = new AWS.DynamoDB.DocumentClient();
+        var item = {
+            TableName: 'learnjs',
+            Key: {
+                userId: identity.id,
+                problemId: problemId
+            }
+        };
+        return learnjs.sendDbRequest(db.get(item), function(){
+            return learnjs.fetchAnswer(problemId);
+        });
+    });
 }

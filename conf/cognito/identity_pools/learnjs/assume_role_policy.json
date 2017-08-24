@@ -10,7 +10,7 @@
       "Action": "sts:AssumeRoleWithWebIdentity",
       "Condition": {
         "StringEquals": {
-          "cognito-identity.amazonaws.com:aud": "us-east-1:3401b3b7-ebc1-4e4a-bcae-345645b56b9d"
+          "cognito-identity.amazonaws.com:aud": "us-east-1:61c0011c-fcd0-4c18-a459-bad95850e948"
         },
         "ForAnyValue:StringLike": {
           "cognito-identity.amazonaws.com:amr": "authenticated"

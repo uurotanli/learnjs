@@ -1,5 +1,5 @@
 {
-    "IdentityPoolId": "us-east-1:61c0011c-fcd0-4c18-a459-bad95850e948",
+    "IdentityPoolId": "us-east-1:3401b3b7-ebc1-4e4a-bcae-345645b56b9d",
     "IdentityPoolName": "learnjs",
     "AllowUnauthenticatedIdentities": false,
     "SupportedLoginProviders": {

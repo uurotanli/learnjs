@@ -1,10 +1,10 @@
 {
     "Role": {
         "Path": "/",
-        "RoleName": "learnjs_cognito_authenticated",
-        "RoleId": "AROAJUVJXRSGVG4HF7GYQ",
-        "Arn": "arn:aws:iam::212022767693:role/learnjs_cognito_authenticated",
-        "CreateDate": "2017-08-24T07:17:49.084Z",
+        "RoleName": "_cognito_authenticated",
+        "RoleId": "AROAIMESEV35DS6P3G334",
+        "Arn": "arn:aws:iam::212022767693:role/_cognito_authenticated",
+        "CreateDate": "2017-08-23T02:48:37.026Z",
         "AssumeRolePolicyDocument": {
             "Version": "2012-10-17",
             "Statement": [
@@ -17,7 +17,7 @@
                     "Action": "sts:AssumeRoleWithWebIdentity",
                     "Condition": {
                         "StringEquals": {
-                            "cognito-identity.amazonaws.com:aud": "us-east-1:61c0011c-fcd0-4c18-a459-bad95850e948"
+                            "cognito-identity.amazonaws.com:aud": ""
                         },
                         "ForAnyValue:StringLike": {
                             "cognito-identity.amazonaws.com:amr": "authenticated"
