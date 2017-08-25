@@ -261,6 +261,7 @@ function create_lambda_service() {
   sleep 5 # See issue #17
   echo "...done!"
   if [[ ! -e ${service_dir}/info.json ]]; then
+    echo "create functionするよ"
     aws --profile $profile lambda create-function \
       --function-name ${function_name} \
       --role ${role_arn} \
